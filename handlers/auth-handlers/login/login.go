@@ -1,7 +1,7 @@
 package login
 
 import (
-	loginAuth "qna-management/controllers/auth-controllers/login"
+	loginAuth "qna-management/controllers/auth/login"
 
 	"github.com/gin-gonic/gin"
 )

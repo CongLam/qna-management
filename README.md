@@ -31,9 +31,13 @@ Using golang Gin Framework to build project
     ```sh
     $ docker-compose up -d --build --<flags name>
     ```
-    - Run container
+    - Run build container
     ```sh
     $ docker-compose up -d --build
+    ```
+    - Start container
+    ```sh
+    $ docker-compose up -d
     ```
     - Stop container
     ```sh
