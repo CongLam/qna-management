@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinate Matrix</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .red-point {
+            background-color: rgb(211, 19, 19);
+        }
+
+        .green-point {
+            background-color: rgb(79, 218, 79);
+        }
+
+        .yellow-point {
+            background-color: rgb(255, 163, 42);
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+<h2>Coordinate Matrix Bruhhh</h2>
+<div style="padding-bottom: 20px;">
+    <table id="coordinateTable">
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <label for="startX">Start X:</label>
+    <input name="start_x" type="number" id="startX" min="0" max="9">
+    <label for="endX">End X:</label>
+    <input name="end_x" type="number" id="endX" min="0" max="9">
+
+    <br><br>
+
+    <label for="startY">Start Y:</label>
+    <input name="start_y" type="number" id="startY" min="0" max="9">
+    <label for="endY">End Y:</label>
+    <input name="end_y" type="number" id="endY" min="0" max="9">
+
+    <br><br>
+
+    <button id="findPathBtn">Find Path</button>
+</div>
+
+<script>
+    // Function to create the coordinate matrix
+    function createMatrix() {
+        var tbody = $('#coordinateTable').find('tbody');
+
+        // Clear existing rows
+        tbody.empty();
+
+        // Loop to create rows and cells
+        for (var i = 0; i < 10; i++) {
+            var row = $('<tr></tr>');
+
+            for (var j = 0; j < 10; j++) {
+                var cellId = "cell_" + j + "_" + i;
+                var cellContent = "(" + j + ", " + i + ")";
+                var cell = $('<td></td>').attr('id', cellId).text(cellContent);
+
+                // Check if the cell coordinates match the red points
+                if ((j === 4 && i === 1) || (j === 1 && i === 2) || (j === 2 && i === 2) ||
+                    (j === 3 && i === 2) || (j === 3 && i === 3) || (j === 3 && i === 4) || (j === 5 && i === 2)) {
+                    cell.addClass("red-point");
+                }
+
+                row.append(cell);
+            }
+
+            tbody.append(row);
+        }
+    }
+
+    // Call the function to create the matrix when the page loads
+    $(document).ready(function () {
+        createMatrix();
+
+        // Find Path button click event
+        $("#findPathBtn").click(function () {
+            var startX = parseInt($("input[name='start_x']").val());
+            var endX = parseInt($("input[name='end_x']").val());
+            var startY = parseInt($("input[name='start_y']").val());
+            var endY = parseInt($("input[name='end_y']").val());
+
+            // Create an object with the parameters
+            var requestData = {
+                start_x: startX,
+                start_y: startY,
+                end_x: endX,
+                end_y: endY
+            };
+
+            // Call the API to find the path
+            $.ajax({
+                url: 'http://localhost:3001/api/v1/graph',
+                method: 'POST', // Change the method to POST
+                contentType: 'application/json', // Set the content type
+                data: JSON.stringify(requestData), // Convert the object to JSON string
+                success: function (data) {
+                    // Remove first search
+                    $('.green-point').removeClass('green-point');
+                    $('.yellow-point').removeClass('yellow-point');
+
+                    // Change color start and goal
+                    var cellStart = "cell_" + startX + "_" + endX;
+                    var cellEnd = "cell_" + startY + "_" + endY;
+                    $('#' + cellStart + ', #' + cellEnd).addClass("yellow-point");
+
+                    // Process the API response and draw the path
+                    var apiData = data.data;
+                    console.log(apiData)
+                    $.each(apiData, function (index, element) {
+                        var cellName = "cell_" + element.X + "_" + element.Y;
+                        // $('#' + cellName).addClass("green-point");
+
+                        setTimeout(function () {
+                            $('#' + cellName).addClass("green-point");
+                        }, index * 250); // Delay increases with each iteration
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

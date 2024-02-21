@@ -66,13 +66,6 @@ func (h *handler) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
-	// err := ctx.ShouldBindJSON(&input)
-	//
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
-
 	resultLogin, errLogin := h.service.LoginService(&input)
 	switch errLogin {
 	case "USER_NOT_FOUND_404":
