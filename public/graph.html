@@ -35,6 +35,7 @@
 
 <body>
 <h2>Coordinate Matrix Bruhhh</h2>
+<h3 id="message"></h3>
 <div style="padding-bottom: 20px;">
     <table id="coordinateTable">
         <tbody>
@@ -78,8 +79,18 @@
                 var cell = $('<td></td>').attr('id', cellId).text(cellContent);
 
                 // Check if the cell coordinates match the red points
-                if ((j === 4 && i === 1) || (j === 1 && i === 2) || (j === 2 && i === 2) ||
-                    (j === 3 && i === 2) || (j === 3 && i === 3) || (j === 3 && i === 4) || (j === 5 && i === 2)) {
+                if (
+                    (j === 1 && i === 2) ||
+                    (j === 2 && i === 2) ||
+                    (j === 3 && i === 2) ||
+                    (j === 3 && i === 3) ||
+                    (j === 3 && i === 4) ||
+                    (j === 2 && i === 4) ||
+                    (j === 1 && i === 4) ||
+                    // (j === 1 && i === 3) ||
+                    (j === 4 && i === 1) ||
+                    (j === 5 && i === 2)
+                ) {
                     cell.addClass("red-point");
                 }
 
@@ -116,6 +127,14 @@
                 contentType: 'application/json', // Set the content type
                 data: JSON.stringify(requestData), // Convert the object to JSON string
                 success: function (data) {
+                    $('#message').text(data.message);
+                    if (data.status_code !== 200) {
+                        $('#message').css("color", "red");
+                        return
+                    } else {
+                        $('#message').css("color", "green");
+                    }
+
                     // Remove first search
                     $('.green-point').removeClass('green-point');
                     $('.yellow-point').removeClass('yellow-point');
@@ -138,6 +157,10 @@
                     });
                 },
                 error: function (xhr, status, error) {
+                    $('#message').text("Something wrong! Recheck your start or goal.");
+                    $('#message').css("color", "red");
+                    $('.green-point').removeClass('green-point');
+                    $('.yellow-point').removeClass('yellow-point');
                     console.error('Error fetching data:', error);
                 }
             });

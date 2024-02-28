@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"fmt"
 	"net/http"
 
 	"qna-management/utils"
@@ -22,12 +21,18 @@ func (h *handler) GetGraph(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&input)
 
 	if err != nil {
+		utils.APIResponse(ctx, err.Error(), 402, http.MethodPost, nil)
 		return
 	}
 
 	resultRegister, errRegister := h.service.GetGraph(&input)
-	fmt.Println(resultRegister, errRegister)
 
-	utils.APIResponse(ctx, "Get graph OK!", http.StatusOK, http.MethodPost, resultRegister)
-	return
+	switch errRegister {
+	case "VALIDATE_FAILED_402":
+		utils.APIResponse(ctx, "Start point or goal point is in obstacles", 402, http.MethodPost, nil)
+		return
+	default:
+		utils.APIResponse(ctx, "Get graph OK!", http.StatusOK, http.MethodPost, resultRegister)
+		return
+	}
 }

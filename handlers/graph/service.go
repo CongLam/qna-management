@@ -1,6 +1,11 @@
 package graph
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"os"
+	"strings"
+)
 
 type service struct {
 	repository Repository
@@ -28,19 +33,42 @@ func (s *service) GetGraph(input *InputPoint) ([]Point, string) {
 	start := Point{input.StartX, input.EndX}
 	goal := Point{input.StartY, input.EndY}
 
-	obstacles := []Point{
-		{1, 2},
-		{2, 2},
-		{3, 2},
-		{3, 3},
-		{3, 4},
-		{4, 1},
-		{5, 2},
+	// obstacles := []Point{
+	// 	{1, 2},
+	// 	{2, 2},
+	// 	{3, 2},
+	// 	{3, 3},
+	// 	{3, 4},
+	// 	{2, 4},
+	// 	{1, 4},
+	// 	// {1, 3},
+	// 	{4, 1},
+	// 	{5, 2},
+	// }
+	obstacles := getDataObstacles()
+	fmt.Println(obstacles)
+	if pointInObstacles(start, obstacles) {
+		fmt.Println("Start point is in obstacles")
+		return []Point{}, "VALIDATE_FAILED_402"
+	}
+
+	if pointInObstacles(goal, obstacles) {
+		fmt.Println("Goal point is in obstacles")
+		return []Point{}, "VALIDATE_FAILED_402"
 	}
 
 	path := findPath(start, goal, obstacles)
 
 	return path, ""
+}
+
+func pointInObstacles(point Point, obstacles []Point) bool {
+	for _, obstacle := range obstacles {
+		if obstacle == point {
+			return true
+		}
+	}
+	return false
 }
 
 func findPath(start, goal Point, obstacles []Point) []Point {
@@ -145,4 +173,45 @@ func heuristic(a, b Point) float64 {
 
 func distance(a, b Point) float64 {
 	return math.Sqrt(float64((a.X-b.X)*(a.X-b.X) + (a.Y-b.Y)*(a.Y-b.Y)))
+}
+
+func getDataObstacles() []Point {
+	// Open the file
+	file, err := os.Open("public/obstacles.txt")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return []Point{}
+	}
+	defer file.Close()
+
+	// Read the content
+	var content string
+	buffer := make([]byte, 100) // Adjust the buffer size according to your file size
+	for {
+		n, err := file.Read(buffer)
+		if err != nil {
+			break
+		}
+		content += string(buffer[:n])
+	}
+
+	// Split the input string into individual points
+	pointStrings := strings.FieldsFunc(content, func(r rune) bool {
+		return r == '{' || r == '}' || r == ' '
+	})
+
+	// Create a slice to store points
+	points := make([]Point, 0)
+
+	// Parse each point string and append it to the points slice
+	for i := 0; i < len(pointStrings)-1; i += 2 {
+		x := pointStrings[i]
+		y := pointStrings[i+1]
+		var point Point
+		fmt.Sscanf(x, "%d", &point.X)
+		fmt.Sscanf(y, "%d", &point.Y)
+		points = append(points, point)
+	}
+
+	return points
 }

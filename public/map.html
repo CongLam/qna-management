@@ -1,0 +1,68 @@
+<html lang="en">
+<head>
+  <title>jQuery UI Draggable - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <style>
+    .map{
+      background-image: url("ban_do.png");
+      background-repeat:no-repeat;
+      background-position: top;
+      background-size: 1000px;
+      height: 800px;
+      width: 1800px;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+</head>
+<body>
+<div>
+  <button class="btn-start">Start</button>
+  <div class="map"></div>
+</div>
+</body>
+<script>
+  $( function() {
+    var ws;
+    var token = window.localStorage.getItem('token');
+    ws = initWS(token);
+
+    function initWS(token) {
+      let urlSocket = "ws://localhost:8080/api/v1/ws?token=" + token;
+      var socket = new WebSocket(urlSocket);
+      socket.onmessage = function (e) {
+        let data = JSON.parse(e.data);
+        $('#draggable').css({
+          "left": data.x_pos, 
+          "top": data.y_pos,
+        });
+      }
+      return socket;
+    }
+
+
+    $('.map').click(function (e) {
+      let x = e.pageX - 6;
+      let y = e.pageY - 8;
+      console.log('[' + e.pageX + ' , ' + e.pageY + ']');
+      if($(this).find('p').length === 2){
+        $(this).find('p:first').remove();
+      }
+      $(this).append("<p style='position: absolute;margin: 0px; padding: 0px; left:"+  x + "; top: " + y +"'>x</p>")
+    });
+
+    $('#draggable').draggable({
+      drag: function() {
+        var offset = $(this).offset();
+        let xPos = offset.left;
+        let yPos = offset.top;
+        ws.send(JSON.stringify({
+                  x_pos: xPos,
+                  y_pos: yPos
+                }
+        ));
+      }
+    });
+  } );
+</script>
+</html>
